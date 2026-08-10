@@ -625,10 +625,10 @@ if (state.debug) {
   window.__pulsefall = {
     world, state, music, engine, renderer, palette, loop, store, ui, recorder,
     /** Jump into a track at a fraction of the way through — for eyeballing sections. */
+    // startAt has to travel in opts, not on state — startRun reads `opts.startAt ?? 0`
+    // and would silently rewind to the top of the track otherwise.
     play(trackId = TRACKS[0].id, at = 0) {
-      state.startAt = at;
-      state.practice = at > 0.001;
-      startRun({ mode: "track", trackId });
+      startRun({ mode: "track", trackId, startAt: at });
     },
     endless() { startRun({ mode: "endless" }); },
   };
