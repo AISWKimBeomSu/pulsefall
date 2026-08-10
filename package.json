@@ -1,0 +1,13 @@
+{
+  "name": "pulsefall",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Rhythm-reflex arcade. Graze the edge, pulse on the beat.",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node scripts/smoke_test.mjs",
+    "audit": "node scripts/audit.mjs all",
+    "icons": "node scripts/make_icons.mjs"
+  }
+}
