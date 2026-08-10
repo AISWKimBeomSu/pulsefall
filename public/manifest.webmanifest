@@ -1,0 +1,17 @@
+{
+  "name": "PULSEFALL",
+  "short_name": "PULSEFALL",
+  "description": "비트 위에서만 벽이 열린다. 스치면 뜨거워지고, 박자에 맞추면 공짜다.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "any",
+  "background_color": "#07060a",
+  "theme_color": "#07060a",
+  "categories": ["games", "music"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

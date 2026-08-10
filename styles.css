@@ -1,0 +1,344 @@
+/* PULSEFALL — UI chrome.
+   The canvas owns the game; everything here is text on top of it. Text stays in the
+   DOM because DOM text is sharper, cheaper, and accessible, and because the canvas
+   should never stall on a font metric. */
+
+:root {
+  --ink: #f4f2ff;
+  --ink-dim: #9b97b8;
+  --ink-faint: #5d5977;
+  --hot: #ffd166;
+  --danger: #ff5d73;
+  --cool: #52e5ff;
+  --bg: #07060a;
+  --panel: rgba(10, 8, 18, 0.82);
+  --line: rgba(255, 255, 255, 0.12);
+  --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Roboto Mono", Menlo, Consolas, monospace;
+  --sans: -apple-system, BlinkMacSystemFont, "Pretendard", "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  --safe-t: env(safe-area-inset-top, 0px);
+  --safe-b: env(safe-area-inset-bottom, 0px);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--sans);
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: none;
+  overscroll-behavior: none;
+  user-select: none;
+}
+
+#stage {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  touch-action: none;
+}
+
+.layer {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.hidden { display: none !important; }
+
+/* ============================ HUD ============================ */
+
+#hud { padding: calc(var(--safe-t) + 10px) 16px calc(var(--safe-b) + 12px); }
+
+.progress {
+  position: relative;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.1);
+  overflow: visible;
+}
+.progress-fill {
+  position: absolute; inset: 0 auto 0 0;
+  width: 0%;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--cool), var(--hot));
+  box-shadow: 0 0 12px rgba(255, 209, 102, 0.55);
+  transition: width 90ms linear;
+}
+.progress-best {
+  position: absolute; top: -3px; bottom: -3px;
+  width: 2px;
+  background: rgba(255, 255, 255, 0.65);
+  left: 0;
+  display: none;
+}
+.progress-best.on { display: block; }
+
+.hud-row { display: flex; align-items: flex-start; justify-content: space-between; margin-top: 10px; gap: 12px; }
+.hud-bottom { position: absolute; left: 16px; right: 16px; bottom: calc(var(--safe-b) + 12px); align-items: flex-end; }
+
+.hud-pct { font-family: var(--mono); font-size: 26px; font-weight: 700; letter-spacing: -0.02em; line-height: 1; }
+.hud-pct i { font-size: 14px; font-style: normal; color: var(--ink-dim); margin-left: 2px; }
+
+.hud-section {
+  flex: 1; text-align: center;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.32em;
+  color: var(--ink-dim); text-transform: uppercase; padding-top: 6px;
+}
+
+.hud-score { font-family: var(--mono); font-size: 20px; font-weight: 600; letter-spacing: 0.01em; opacity: 0.92; }
+
+.hud-heat { display: flex; flex-direction: column; gap: 2px; }
+.hud-heat b { font-family: var(--mono); font-size: 22px; line-height: 1; color: var(--hot); transition: color 120ms; }
+.hud-heat span { font-size: 9px; letter-spacing: 0.3em; color: var(--ink-faint); }
+.hud-heat.hot b { color: #fff; text-shadow: 0 0 16px var(--hot); }
+
+.hud-chain { font-family: var(--mono); font-size: 15px; color: var(--ink-dim); letter-spacing: 0.1em; }
+
+/* ============================ callouts ============================ */
+
+.callout {
+  position: fixed; left: 0; right: 0; top: 26%;
+  z-index: 14; pointer-events: none; text-align: center;
+  font-family: var(--mono); font-weight: 700;
+  font-size: clamp(28px, 8vw, 68px);
+  letter-spacing: 0.22em; text-indent: 0.22em;
+  opacity: 0; color: #fff;
+}
+.callout.show { animation: calloutIn 1.05s cubic-bezier(.16,.9,.28,1) forwards; }
+.callout.tiny { font-size: clamp(16px, 4vw, 30px); letter-spacing: 0.34em; }
+@keyframes calloutIn {
+  0%   { opacity: 0; transform: scale(1.5); filter: blur(6px); }
+  16%  { opacity: 1; transform: scale(1); filter: blur(0); }
+  70%  { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(0.97); }
+}
+
+.toast {
+  position: fixed; left: 50%; bottom: calc(var(--safe-b) + 76px);
+  transform: translateX(-50%);
+  z-index: 15; pointer-events: none;
+  font-family: var(--mono); font-size: 12px; letter-spacing: 0.2em;
+  padding: 8px 16px; border-radius: 999px;
+  background: var(--panel); border: 1px solid var(--line);
+  opacity: 0; transition: opacity 200ms;
+}
+.toast.show { opacity: 1; }
+
+/* ============================ screens ============================ */
+
+/* The menus float over live gameplay (attract mode), so the scrim is deliberately
+   thin and heavily blurred: the walls read as moving colour behind the text without
+   ever competing with it. Panels carry their own contrast instead. */
+.screen {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 26px; padding: calc(var(--safe-t) + 24px) 20px calc(var(--safe-b) + 24px);
+  pointer-events: auto;
+  background: radial-gradient(120% 90% at 50% 45%, rgba(6, 5, 12, 0.42), rgba(4, 3, 9, 0.78));
+  backdrop-filter: blur(7px) saturate(0.85);
+  -webkit-backdrop-filter: blur(7px) saturate(0.85);
+  overflow-y: auto;
+}
+.screen.dim {
+  background: rgba(4, 3, 9, 0.8);
+  backdrop-filter: blur(12px) saturate(0.7);
+  -webkit-backdrop-filter: blur(12px) saturate(0.7);
+}
+
+.brand { text-align: center; }
+.logo {
+  font-family: var(--mono); font-weight: 800;
+  font-size: clamp(38px, 12vw, 92px);
+  letter-spacing: 0.13em; text-indent: 0.13em; line-height: 1;
+}
+.logo span { color: var(--hot); }
+.brand.small .logo { font-size: clamp(26px, 7vw, 48px); opacity: 0.9; }
+.tagline { margin-top: 14px; font-size: 13px; letter-spacing: 0.28em; color: var(--ink-dim); }
+
+.screen-title {
+  font-family: var(--mono); font-size: 13px; font-weight: 600;
+  letter-spacing: 0.44em; text-indent: 0.44em; color: var(--ink-dim);
+}
+
+.cta {
+  pointer-events: auto; cursor: pointer;
+  font-family: var(--mono); font-size: 14px; font-weight: 700;
+  letter-spacing: 0.26em; text-indent: 0.26em;
+  padding: 15px 30px; border-radius: 4px;
+  color: #0b0812; background: var(--ink); border: 0;
+  transition: transform 120ms, box-shadow 120ms, background 120ms;
+}
+.cta:hover, .cta:focus-visible { transform: translateY(-1px); box-shadow: 0 8px 26px rgba(255,255,255,0.18); outline: none; }
+.cta:active { transform: translateY(1px); }
+.cta em { font-style: normal; opacity: 0.45; font-size: 11px; margin-left: 8px; }
+.cta.ghost { background: transparent; color: var(--ink-dim); border: 1px solid var(--line); }
+.cta.ghost:hover { color: var(--ink); border-color: rgba(255,255,255,0.34); }
+.cta.small { padding: 11px 22px; font-size: 12px; }
+
+.fineprint { font-size: 11px; letter-spacing: 0.14em; color: var(--ink-faint); text-align: center; max-width: 44ch; line-height: 1.7; }
+
+/* ============================ menus ============================ */
+
+.menu { display: flex; flex-direction: column; gap: 8px; width: min(560px, 100%); }
+.menu.narrow { width: min(320px, 100%); }
+
+.menu-item {
+  display: flex; align-items: center; gap: 16px;
+  width: 100%; padding: 15px 18px; cursor: pointer;
+  background: rgba(9, 7, 16, 0.62);
+  border: 1px solid var(--line); border-radius: 6px;
+  color: var(--ink); text-align: left; font-family: var(--sans);
+  transition: background 120ms, border-color 120ms, transform 120ms;
+}
+.menu-item:hover, .menu-item.sel { background: rgba(28, 24, 44, 0.78); border-color: rgba(255,255,255,0.34); transform: translateX(2px); }
+.menu-item.sel { box-shadow: inset 3px 0 0 var(--hot); }
+.menu-item:disabled { opacity: 0.32; cursor: not-allowed; transform: none; }
+.menu-item.ghost { background: transparent; }
+
+.mi-key {
+  font-family: var(--mono); font-size: 12px; letter-spacing: 0.1em;
+  color: var(--ink-faint); min-width: 22px;
+}
+.mi-body { flex: 1; display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.mi-body b { font-family: var(--mono); font-size: 15px; letter-spacing: 0.2em; }
+.mi-body i { font-style: normal; font-size: 12px; color: var(--ink-dim); letter-spacing: 0.02em; }
+.mi-meta { font-family: var(--mono); font-size: 12px; color: var(--ink-dim); text-align: right; white-space: nowrap; }
+.mi-meta b { color: var(--hot); font-weight: 700; }
+.mi-lock { font-size: 11px; color: var(--ink-faint); letter-spacing: 0.1em; }
+
+.track-bar { height: 3px; border-radius: 2px; background: rgba(255,255,255,0.12); margin-top: 6px; overflow: hidden; }
+.track-bar i { display: block; height: 100%; background: linear-gradient(90deg, var(--cool), var(--hot)); }
+
+/* ============================ how to ============================ */
+
+.howto-grid {
+  display: grid; gap: 10px; width: min(720px, 100%);
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+.how-card { padding: 16px; border: 1px solid var(--line); border-radius: 6px; background: rgba(255,255,255,0.03); }
+.how-card.accent { border-color: rgba(82, 229, 255, 0.4); }
+.how-card.hot { border-color: rgba(255, 209, 102, 0.4); }
+.how-card.danger { border-color: rgba(255, 93, 115, 0.4); }
+.how-card.swirl { border-color: rgba(167, 139, 250, 0.45); }
+.how-key { font-family: var(--mono); font-size: 12px; letter-spacing: 0.2em; color: var(--ink-faint); }
+.how-card h3 { font-family: var(--mono); font-size: 16px; letter-spacing: 0.22em; margin: 8px 0 8px; }
+.how-card.accent h3 { color: var(--cool); }
+.how-card.hot h3 { color: var(--hot); }
+.how-card.danger h3 { color: var(--danger); }
+.how-card p { font-size: 13px; line-height: 1.7; color: var(--ink-dim); }
+.how-card b { color: var(--ink); }
+
+/* ============================ settings ============================ */
+
+.settings-list { display: flex; flex-direction: column; gap: 12px; width: min(420px, 100%); }
+.setting { display: flex; align-items: center; justify-content: space-between; gap: 18px; font-family: var(--mono); font-size: 12px; letter-spacing: 0.2em; color: var(--ink-dim); }
+.setting input[type="range"] { flex: 1; max-width: 240px; accent-color: var(--hot); }
+.setting input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--hot); }
+
+/* ============================ result ============================ */
+
+.result-head { text-align: center; }
+.result-verdict { font-family: var(--mono); font-size: 12px; letter-spacing: 0.5em; text-indent: 0.5em; color: var(--danger); }
+.result-verdict.clear { color: var(--hot); }
+.result-verdict.best { color: var(--cool); }
+.result-pct { font-family: var(--mono); font-weight: 800; font-size: clamp(64px, 22vw, 150px); line-height: 0.94; letter-spacing: -0.03em; }
+.result-pct i { font-size: 0.32em; font-style: normal; color: var(--ink-dim); margin-left: 4px; }
+.result-bestline { font-family: var(--mono); font-size: 12px; letter-spacing: 0.2em; color: var(--ink-dim); margin-top: 8px; min-height: 1.2em; }
+
+.result-stats { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+.stat { min-width: 86px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 6px; text-align: center; background: rgba(255,255,255,0.03); }
+.stat b { display: block; font-family: var(--mono); font-size: 20px; font-weight: 700; }
+.stat span { font-size: 9px; letter-spacing: 0.24em; color: var(--ink-faint); }
+
+.result-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+
+.practice-row { display: flex; align-items: center; gap: 12px; font-family: var(--mono); font-size: 11px; letter-spacing: 0.2em; color: var(--ink-dim); flex-wrap: wrap; justify-content: center; }
+.practice-marks { display: flex; gap: 5px; flex-wrap: wrap; justify-content: center; }
+.practice-marks button {
+  font-family: var(--mono); font-size: 11px; padding: 7px 10px; cursor: pointer;
+  background: rgba(255,255,255,0.05); border: 1px solid var(--line); border-radius: 4px; color: var(--ink);
+}
+.practice-marks button:hover { background: rgba(255,255,255,0.14); }
+.practice-marks button:disabled { opacity: 0.25; cursor: not-allowed; }
+
+/* ============================ perf badge ============================ */
+
+.perf {
+  position: fixed; right: 8px; bottom: 8px; z-index: 30;
+  font-family: var(--mono); font-size: 10px; color: var(--ink-faint);
+  background: rgba(0,0,0,0.5); padding: 4px 8px; border-radius: 4px; pointer-events: none;
+}
+
+@media (max-width: 480px) {
+  .hud-score { font-size: 16px; }
+  .result-stats .stat { min-width: 72px; padding: 10px; }
+  .menu-item { padding: 13px 14px; gap: 12px; }
+  .mi-body i { font-size: 11px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .callout.show { animation-duration: 0.6s; }
+  .cta, .menu-item { transition: none; }
+}
+
+/* ---- how-to: the first screen a new player sees, so it ends in a start ---- */
+/* Five rule cards do not fit a laptop viewport, and this is the one screen where a
+   player who cannot find the start button simply leaves. The cards may scroll; the
+   button may not. It sticks to the floor of the scroller at every height. */
+.howto-actions {
+  position: sticky;
+  bottom: calc(var(--safe-b) * -1 - 24px);
+  z-index: 2;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  width: 100%;
+  margin-top: -8px;
+  padding: 14px 0 calc(var(--safe-b) + 20px);
+  background: linear-gradient(to top, rgba(6, 5, 11, .97) 62%, rgba(6, 5, 11, 0));
+}
+.howto-actions .cta em {
+  font-style: normal;
+  opacity: .55;
+  font-size: .78em;
+  margin-left: .5em;
+  letter-spacing: .12em;
+}
+
+/* ---- capture indicator --------------------------------------------------- */
+.rec-badge {
+  position: fixed;
+  top: calc(env(safe-area-inset-top, 0px) + 12px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(8, 6, 12, .72);
+  border: 1px solid rgba(255, 62, 62, .5);
+  font: 700 11px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: .18em;
+  color: #ff6b6b;
+  pointer-events: none;
+}
+.rec-badge i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ff3e3e;
+  animation: recBlink 1s steps(1, end) infinite;
+}
+.rec-badge b { color: #fff; opacity: .8; font-weight: 600; }
+@keyframes recBlink { 50% { opacity: .15; } }
+@media (prefers-reduced-motion: reduce) { .rec-badge i { animation: none; } }

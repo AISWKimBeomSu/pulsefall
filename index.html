@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no, maximum-scale=1" />
+<meta name="theme-color" content="#07060a" />
+<meta name="description" content="PULSEFALL — 비트 위에서만 벽을 뚫는다. 스치면 강해지고, 박자에 맞추면 공짜다." />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="mobile-web-app-capable" content="yes" />
+<title>PULSEFALL</title>
+<link rel="manifest" href="public/manifest.webmanifest" />
+<link rel="icon" href="public/favicon.svg" type="image/svg+xml" />
+<link rel="apple-touch-icon" href="public/icons/apple-touch-icon.png" />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<canvas id="stage" aria-label="PULSEFALL game field"></canvas>
+
+<!-- ===================== in-run HUD ===================== -->
+<div id="hud" class="layer hidden" aria-hidden="true">
+  <div class="progress">
+    <div class="progress-fill" id="progFill"></div>
+    <div class="progress-best" id="progBest"></div>
+  </div>
+  <div class="hud-row hud-top">
+    <div class="hud-pct"><span id="hudPct">0</span><i>%</i></div>
+    <div class="hud-section" id="hudSection"></div>
+    <div class="hud-score" id="hudScore">0</div>
+  </div>
+  <div class="hud-row hud-bottom">
+    <div class="hud-heat" id="hudHeat"><b>×1.0</b><span>HEAT</span></div>
+    <div class="hud-chain" id="hudChain"></div>
+  </div>
+</div>
+
+<!-- ===================== callouts ===================== -->
+<div id="callout" class="callout"></div>
+<div id="toast" class="toast"></div>
+
+<!-- ===================== boot ===================== -->
+<section id="boot" class="layer screen">
+  <div class="brand">
+    <h1 class="logo">PULSE<span>FALL</span></h1>
+    <p class="tagline">비트 위에서만 벽이 열린다</p>
+  </div>
+  <button class="cta" id="bootBtn">TAP TO BEGIN</button>
+  <p class="fineprint">사운드 켜고 플레이하세요 · 음악은 실시간 합성됩니다</p>
+</section>
+
+<!-- ===================== title / mode ===================== -->
+<section id="title" class="layer screen hidden">
+  <div class="brand small">
+    <h1 class="logo">PULSE<span>FALL</span></h1>
+  </div>
+  <nav class="menu" id="modeMenu">
+    <button class="menu-item" data-mode="tracks">
+      <span class="mi-key">01</span>
+      <span class="mi-body"><b>TRACKS</b><i>세 개의 곡. 100%를 뚫어라.</i></span>
+      <span class="mi-meta" id="metaTracks"></span>
+    </button>
+    <button class="menu-item" data-mode="daily">
+      <span class="mi-key">02</span>
+      <span class="mi-body"><b>DAILY PULSE</b><i>오늘 전 세계가 같은 차트를 받는다.</i></span>
+      <span class="mi-meta" id="metaDaily"></span>
+    </button>
+    <button class="menu-item" data-mode="endless">
+      <span class="mi-key">03</span>
+      <span class="mi-body"><b>ENDLESS</b><i>끝은 없다. 얼마나 뜨거워질 수 있나.</i></span>
+      <span class="mi-meta" id="metaEndless"></span>
+    </button>
+    <button class="menu-item ghost" data-mode="howto">
+      <span class="mi-key">?</span>
+      <span class="mi-body"><b>HOW TO PLAY</b><i>60초면 충분하다.</i></span>
+    </button>
+    <button class="menu-item ghost" data-mode="settings">
+      <span class="mi-key">≡</span>
+      <span class="mi-body"><b>SETTINGS</b><i>사운드 · 화면</i></span>
+    </button>
+  </nav>
+  <p class="fineprint">↑↓ 이동 · SPACE 선택</p>
+</section>
+
+<!-- ===================== track select ===================== -->
+<section id="tracks" class="layer screen hidden">
+  <h2 class="screen-title">SELECT TRACK</h2>
+  <nav class="menu" id="trackMenu"></nav>
+  <p class="fineprint">ESC 뒤로 · 죽은 지점부터 연습하려면 결과 화면에서 PRACTICE</p>
+</section>
+
+<!-- ===================== how to ===================== -->
+<section id="howto" class="layer screen hidden">
+  <h2 class="screen-title">HOW TO PLAY</h2>
+  <div class="howto-grid">
+    <div class="how-card">
+      <div class="how-key">← →</div>
+      <h3>MOVE</h3>
+      <p>중심을 도는 커서를 좌우로 돌린다. 누르고 있는 동안만 움직인다. 터치는 화면 좌/우 끝.</p>
+    </div>
+    <div class="how-card accent">
+      <div class="how-key">SPACE</div>
+      <h3>PULSE</h3>
+      <p><span data-const="PULSE_DURATION">0.26</span>초 동안 벽을 통과한다. <b>비트 위에서는 게이지가 없어도 나간다.</b> 어긋나면 게이지 한 칸을 통째로 먹는다. 터치는 화면 중앙.</p>
+    </div>
+    <div class="how-card hot">
+      <div class="how-key">↯</div>
+      <h3>GRAZE</h3>
+      <p>벽 가장자리를 <b>스칠수록</b> 게이지와 HEAT가 오른다. 점수는 시간 × HEAT. 안전하게 피하면 아무것도 못 얻는다.</p>
+    </div>
+    <div class="how-card danger">
+      <div class="how-key">◉</div>
+      <h3>SEAL</h3>
+      <p>틈이 없는 링. 피할 수 없다. PULSE만이 답이다. 색이 다르니 미리 보인다.</p>
+    </div>
+    <div class="how-card swirl">
+      <div class="how-key">↻</div>
+      <h3>SWIRL</h3>
+      <p>벽은 <b>돌면서</b> 다가온다. 지금 보이는 틈은 진짜 틈이 아니다. 도착할 자리를 읽고 <b>먼저 가 있어라.</b> 벽은 닿는 순간 정확히 멈춘다.</p>
+    </div>
+  </div>
+  <p class="fineprint">모든 차트는 고정되어 있다. 죽은 자리는 외울 수 있다.</p>
+  <div class="howto-actions">
+    <button class="cta" data-mode="quickstart">바로 시작 <em>FIRST LIGHT</em></button>
+    <button class="cta small ghost" data-back="title">BACK</button>
+  </div>
+</section>
+
+<!-- ===================== settings ===================== -->
+<section id="settings" class="layer screen hidden">
+  <h2 class="screen-title">SETTINGS</h2>
+  <div class="settings-list">
+    <label class="setting"><span>MUSIC</span><input type="range" id="setMusic" min="0" max="100" /></label>
+    <label class="setting"><span>SFX</span><input type="range" id="setSfx" min="0" max="100" /></label>
+    <label class="setting toggle"><span>SCREEN SHAKE</span><input type="checkbox" id="setShake" /></label>
+    <button class="menu-item ghost" id="setReset"><span class="mi-key">!</span><span class="mi-body"><b>RESET PROGRESS</b><i>기록을 전부 지운다</i></span></button>
+  </div>
+  <button class="cta small" data-back="title">BACK</button>
+</section>
+
+<!-- ===================== pause ===================== -->
+<section id="pause" class="layer screen hidden dim">
+  <h2 class="screen-title">PAUSED</h2>
+  <nav class="menu narrow">
+    <button class="menu-item" data-pause="resume"><span class="mi-key">▶</span><span class="mi-body"><b>RESUME</b></span></button>
+    <button class="menu-item" data-pause="restart"><span class="mi-key">↺</span><span class="mi-body"><b>RESTART</b></span></button>
+    <button class="menu-item ghost" data-pause="quit"><span class="mi-key">✕</span><span class="mi-body"><b>QUIT</b></span></button>
+  </nav>
+</section>
+
+<!-- ===================== result ===================== -->
+<section id="result" class="layer screen hidden dim">
+  <div class="result-head">
+    <div class="result-verdict" id="resVerdict">DOWN</div>
+    <div class="result-pct"><span id="resPct">0</span><i>%</i></div>
+    <div class="result-bestline" id="resBestLine"></div>
+  </div>
+  <div class="result-stats">
+    <div class="stat"><b id="resScore">0</b><span>SCORE</span></div>
+    <div class="stat"><b id="resChain">0</b><span>BEST CHAIN</span></div>
+    <div class="stat"><b id="resGraze">0</b><span>GRAZE</span></div>
+    <div class="stat"><b id="resPerfect">0</b><span>ON-BEAT</span></div>
+  </div>
+  <div class="result-actions">
+    <button class="cta" data-res="retry">RETRY <em>SPACE</em></button>
+    <button class="cta ghost" data-res="practice" id="btnPractice">PRACTICE</button>
+    <button class="cta ghost" data-res="share">SHARE</button>
+    <button class="cta ghost" data-res="quit">QUIT <em>ESC</em></button>
+  </div>
+  <div class="practice-row hidden" id="practiceRow">
+    <span>START AT</span>
+    <div class="practice-marks" id="practiceMarks"></div>
+  </div>
+</section>
+
+<div id="perf" class="perf hidden"></div>
+
+<script type="module" src="src/main.js"></script>
+<noscript><p style="color:#fff;padding:2rem;font:600 16px system-ui">PULSEFALL requires JavaScript.</p></noscript>
+</body>
+</html>
