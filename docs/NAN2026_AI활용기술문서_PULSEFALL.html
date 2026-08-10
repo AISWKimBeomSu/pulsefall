@@ -1,0 +1,435 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<title>PULSEFALL — AI 활용 기술 문서</title>
+<style>
+@page { size: A4; margin: 15mm 14mm 13mm; }
+* { box-sizing: border-box; }
+html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+body {
+  margin: 0 auto; max-width: 190mm; padding: 10mm 8mm;
+  font-family: "Pretendard", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo",
+    "Noto Sans KR", "Malgun Gothic", sans-serif;
+  font-size: 10.3pt; line-height: 1.66; color: #15161c; background: #fff;
+  word-break: keep-all;
+}
+@media print { body { padding: 0; max-width: none; } }
+code, .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .88em; }
+code { background: #f2f3f8; padding: .5mm 1.2mm; border-radius: 2px; }
+pre code { background: none; padding: 0; }
+
+.cover { padding: 2mm 0 6mm; border-bottom: 2.5px solid #15161c; margin-bottom: 7mm; }
+.eyebrow { font-size: 8.4pt; letter-spacing: .2em; color: #7a7d8c; font-weight: 700; margin: 0 0 3mm; }
+.cover h1 { margin: 0; font-size: 24pt; letter-spacing: -.02em; font-weight: 800; line-height: 1.14; }
+.cover .sub { margin: 2.5mm 0 0; font-size: 11.6pt; color: #3d4050; font-weight: 500; }
+.cover .meta { margin: 5mm 0 0; display: flex; flex-wrap: wrap; gap: 2.5mm 7mm; font-size: 8.8pt; color: #6a6d7c; }
+.cover .meta b { color: #15161c; font-weight: 700; }
+
+h2 { margin: 9mm 0 3mm; font-size: 13pt; font-weight: 800; letter-spacing: -.01em;
+     padding-bottom: 1.6mm; border-bottom: 1.4px solid #d8dae3; break-after: avoid; page-break-after: avoid; }
+h2 .n { color: #7c4dff; margin-right: 2.4mm; font-variant-numeric: tabular-nums; }
+h3 { margin: 5.5mm 0 2mm; font-size: 10.6pt; font-weight: 800; color: #23253a; break-after: avoid; page-break-after: avoid; }
+p { margin: 0 0 2.6mm; }
+ul, ol { margin: 0 0 3mm; padding-left: 5.4mm; }
+li { margin: 0 0 1.6mm; }
+a { color: #6a2fd6; text-decoration: none; word-break: break-all; }
+
+.callout { margin: 3.5mm 0; padding: 3.4mm 4mm; border-left: 3px solid #7c4dff;
+           background: #f6f3ff; border-radius: 0 3px 3px 0; break-inside: avoid; page-break-inside: avoid; }
+.callout.warn { border-left-color: #d9822b; background: #fff7ec; }
+.callout.key { border-left-color: #109c74; background: #edfaf5; }
+.callout p:last-child { margin-bottom: 0; }
+.callout .lbl { display: block; font-size: 7.8pt; letter-spacing: .15em; text-transform: uppercase;
+                font-weight: 800; color: #6a2fd6; margin-bottom: 1.5mm; }
+.callout.warn .lbl { color: #b46a1c; }
+.callout.key .lbl { color: #0c7d5c; }
+
+pre { margin: 2.6mm 0; padding: 3.2mm 3.6mm; background: #14151d; color: #dfe2ec; border-radius: 4px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 8pt; line-height: 1.55;
+      white-space: pre-wrap; break-inside: avoid; page-break-inside: avoid; }
+pre .c { color: #838899; }
+pre .k { color: #ff9ec7; }
+
+blockquote { margin: 3mm 0; padding: 2.4mm 0 2.4mm 4.2mm; border-left: 2.5px solid #c9ccd8; color: #3d4050; }
+blockquote p { margin: 0; }
+
+table { width: 100%; border-collapse: collapse; margin: 3mm 0; font-size: 9.1pt;
+        break-inside: avoid; page-break-inside: avoid; }
+th, td { padding: 2.1mm 2.6mm; border-bottom: 1px solid #e3e5ed; text-align: left; vertical-align: top; }
+th { font-size: 8.1pt; letter-spacing: .08em; color: #6a6d7c; border-bottom: 1.4px solid #b9bcca; font-weight: 800; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+tbody tr:last-child td { border-bottom: none; }
+
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; }
+.card { border: 1.2px solid #dfe1ea; border-radius: 5px; padding: 3.4mm 4mm;
+        break-inside: avoid; page-break-inside: avoid; }
+.card h3 { margin-top: 0; }
+.stat-row { display: flex; gap: 3mm; margin: 4mm 0; }
+.stat { flex: 1; border: 1.2px solid #dfe1ea; border-radius: 5px; padding: 3mm; text-align: center; }
+.stat b { display: block; font-size: 15.5pt; font-weight: 800; letter-spacing: -.02em; }
+.stat span { display: block; font-size: 7.4pt; letter-spacing: .08em; color: #7a7d8c; margin-top: .8mm; }
+.pagebreak { break-before: page; page-break-before: always; }
+footer { margin-top: 9mm; padding-top: 3mm; border-top: 1px solid #dfe1ea;
+         font-size: 8pt; color: #8a8d9c; display: flex; justify-content: space-between; }
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <p class="eyebrow">NHN GAME × AI 해커톤 NAN 2026 · 사전 과제</p>
+  <h1>AI 활용 기술 문서</h1>
+  <p class="sub">AI에게 코드를 시키는 대신, AI를 채점할 기계를 먼저 만들었습니다.</p>
+  <div class="meta">
+    <span><b>프로젝트</b> PULSEFALL</span>
+    <span><b>팀원</b> 김범수 · 송채우 · 신승민</span>
+    <span><b>제출일</b> 2026. 08. 10</span>
+  </div>
+</div>
+
+<h2><span class="n">01</span>요약</h2>
+
+<p>
+  AI에게 "게임 만들어줘"라고 하면 게임은 나옵니다. 문제는 그 결과물이 재미있는지, 공정한지,
+  60fps로 도는지를 <b>AI 자신도 모른다</b>는 것입니다.
+</p>
+<div class="callout key">
+  <span class="lbl">이 문서의 요지</span>
+  <p>
+    저희가 실제로 설계한 것은 게임 코드가 아니라
+    <b>AI의 출력을 사람 손을 거치지 않고 기각할 수 있는 검증 장치</b>였습니다.
+    게임은 그 장치를 통과한 결과물입니다. 이 문서는 그 장치를 어떻게 만들었고,
+    실제로 어떻게 작동했는지를 다룹니다.
+  </p>
+</div>
+
+<h2><span class="n">02</span>사용한 AI 도구</h2>
+
+<table>
+  <thead><tr><th style="width:38mm">도구</th><th>사용 범위</th><th style="width:28mm">비중</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><b>Claude Code</b><br><span style="color:#6a6d7c;font-size:8.6pt">Anthropic · Claude Opus</span></td>
+      <td>게임 전체 구현, 리팩터링, 차트 공정성 솔버 설계, 오토플레이 봇 작성, 성능 프로파일링,
+          문서 작성. 터미널에서 파일을 직접 읽고 쓰며 <code>node</code> 스크립트를 실행해
+          결과를 보고 스스로 수정하는 방식으로 사용.</td>
+      <td>코드 작성의 대부분</td>
+    </tr>
+    <tr>
+      <td><b>헤드리스 브라우저 자동화</b><br><span style="color:#6a6d7c;font-size:8.6pt">Chrome DevTools Protocol</span></td>
+      <td>실제 렌더 프레임 계측, 카메라 각도 측정, 뷰포트별 레이아웃 검증.
+          AI가 "구현했다"고 주장한 값을 <b>실행 중인 화면에서 다시 재서</b> 확인.</td>
+      <td>검증 전용</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>
+  <b>생성형 이미지·음악 AI는 사용하지 않았습니다.</b> 그래픽은 전부 Canvas 2D 코드이고,
+  음악은 Web Audio API로 브라우저에서 실시간 합성합니다.
+</p>
+
+<h2><span class="n">03</span>사람이 정한 것과 AI가 만든 것</h2>
+
+<div class="grid2">
+  <div class="card">
+    <h3>사람이 결정한 것</h3>
+    <ul>
+      <li><b>무엇이 재미인가</b> — "피하는 게임"을 "붙어 있는 게임"으로 뒤집는 결정</li>
+      <li><b>무엇을 금지할 것인가</b> — 성능·공정성에 대한 불변 규칙</li>
+      <li><b>무엇을 합격으로 볼 것인가</b> — 자동 검사의 통과 기준</li>
+      <li><b>어디까지 허용할 것인가</b> — 카메라 45° 상한 같은 수치 한계</li>
+      <li>AI의 보고를 <b>믿지 않고 다시 재는 일</b></li>
+    </ul>
+  </div>
+  <div class="card">
+    <h3>AI가 수행한 것</h3>
+    <ul>
+      <li>약 <b>6,700줄</b>의 구현 (게임 5,400줄 + 도구·서버 1,300줄)</li>
+      <li>차트 공정성 솔버와 오토플레이 봇의 알고리즘 구현</li>
+      <li>실패한 검사를 읽고 <b>원인을 역추적해 스스로 수정</b></li>
+      <li>성능 계측 스크립트 작성 및 실행</li>
+    </ul>
+  </div>
+</div>
+
+<p style="margin-top:3.5mm">
+  경계는 명확했습니다. <b>판정 기준은 사람이 쥐고, 구현은 AI가 합니다.</b>
+</p>
+
+<h2><span class="n">04</span>AI에게 준 상시 제약 — 프롬프트가 아니라 코드로 강제</h2>
+
+<p>
+  매번 프롬프트로 반복하는 대신, <b>어기면 자동으로 빌드가 깨지는 형태</b>로 규칙을 심었습니다.
+  AI는 이 규칙을 지키는 코드만 통과시킬 수 있습니다.
+</p>
+
+<table>
+  <thead><tr><th style="width:44mm">지시</th><th>강제 수단</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><b><code>ctx.shadowBlur</code>를 절대 쓰지 마라</b></td>
+      <td>그림자 블러 한 번이 캔버스 전면 블러 패스를 유발해 모바일에서 프레임을 무너뜨립니다.
+          검사 스크립트가 소스 전체를 훑어 사용 시 즉시 실패시킵니다. 주석은 제외하고 코드만
+          검사합니다 — 금지 이유를 설명한 주석까지 걸리면 안 되므로.</td>
+    </tr>
+    <tr>
+      <td><b>봇이 못 깨는 차트는 차트가 아니다</b></td>
+      <td>헤드리스 오토플레이 봇이 <b>모든 차트를 100% 클리어</b>하지 못하면 배포가 막힙니다.
+          GitHub Actions에서 push마다 실행됩니다.</td>
+    </tr>
+    <tr>
+      <td><b>연출이 판정을 건드리면 안 된다</b></td>
+      <td>카메라·기울기·흔들림은 전부 <b>읽기 전용</b>으로 시뮬레이션을 참조만 합니다.
+          시뮬레이션은 240Hz 고정 틱으로 렌더와 분리돼 있습니다.</td>
+    </tr>
+    <tr>
+      <td><b>박자 위의 PULSE는 절대 거부하지 마라</b></td>
+      <td>게임 로직·차트 검증기·봇 <b>세 곳이 같은 규칙을 공유</b>해야 합니다.
+          한 곳이라도 어긋나면 §6의 사고가 재발합니다.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2><span class="n">05</span>구조 — 검증 가능하게 만든 설계</h2>
+
+<h3>5.1 결정론이 검증의 전제</h3>
+<p>
+  시뮬레이션을 <b>240Hz 고정 틱</b>으로 돌리고 렌더링과 분리했습니다. 같은 입력은 항상 같은 결과를
+  내므로, <b>봇이 클리어한 차트는 사람도 반드시 클리어할 수 있습니다.</b>
+  이 성질이 없으면 아래의 모든 자동 검증이 무의미해집니다.
+</p>
+
+<h3>5.2 차트 공정성 솔버 — 불가능한 배치를 컴파일 타임에 제거</h3>
+<p>
+  절차 생성된 벽 배치는 그냥 두면 <b>물리적으로 통과 불가능한 조합</b>이 나옵니다.
+  차트 컴파일러는 벽을 도착 시각 기준으로 <b>링(ring)</b>으로 묶고,
+  플레이어의 <b>실제 각속도</b>로 다음 틈까지 갈 수 있는지 계산합니다.
+</p>
+<pre><span class="c">// 속도가 섞인 패턴에서는 나중에 생성된 링이 먼저 도착할 수 있다.</span>
+<span class="c">// 플레이어는 도착 순서로 만나므로, 솔버도 그 순서로 걸어야 한다.</span>
+rings.sort((a, b) =&gt; a.enter - b.enter);</pre>
+<p>
+  닿을 수 없는 링은 <b>격자 위에서 회전</b>시켜 반드시 도달 가능하게 만듭니다.
+  틈이 아예 없는 SEAL 링은 회전으로 풀 수 없으므로 <b>PULSE 쿨다운</b>까지 모델링해
+  "직전 PULSE 이후 충분한 시간이 지났는가"를 확인합니다.
+  실측 예 — HOLLOW SUN: 링 173개 중 37개를 회전 보정, 최소 여유 0.0437.
+</p>
+
+<h3>5.3 오토플레이 봇 — CI에서 매번 전곡을 플레이</h3>
+<p>
+  봇은 매 틱마다 눈앞의 벽을 180개 각도 샘플로 스캔해 빈 구간을 찾고,
+  <b>남은 시간 안에 도달 가능한지</b> 판단해 이동하거나 PULSE를 씁니다.
+  push할 때마다 고정 곡 3개 + DAILY + ENDLESS 6시드를 전부 플레이합니다.
+</p>
+
+<div class="stat-row">
+  <div class="stat"><b>79</b><span>자동 검사 통과</span></div>
+  <div class="stat"><b>100%</b><span>전 차트 봇 클리어</span></div>
+  <div class="stat"><b>6/6</b><span>ENDLESS 시드 생존</span></div>
+  <div class="stat"><b>530</b><span>검증된 벽 (고정 곡)</span></div>
+</div>
+
+<div class="pagebreak"></div>
+
+<h2><span class="n">06</span>사례 — AI가 만든 검사기가 거짓 보고를 한 날</h2>
+
+<p>이 프로젝트에서 <b>AI 디렉팅이 실제로 값을 한 순간</b>이라 따로 적습니다.</p>
+
+<h3>증상</h3>
+<p>
+  오토플레이 봇이 HOLLOW SUN의 <b>38.0%</b> 지점에서 죽고
+  <code>"이 차트는 클리어 불가능"</code>이라고 보고했습니다.
+  가장 자연스러운 다음 행동은 <b>차트 생성기를 고치는 것</b>이었습니다.
+</p>
+
+<h3>개입</h3>
+<p>
+  차트를 고치기 전에 <b>"솔버는 뭐라고 하는가"</b>를 먼저 물었습니다.
+  진단 스크립트를 따로 짜서 돌린 결과, 공정성 솔버는 <b>모든 링이 도달 가능하다</b>고
+  답했습니다(<code>worstSlack 0.0437 &gt; 0</code>). <b>두 도구의 주장이 서로 모순이었습니다.</b>
+</p>
+
+<h3>원인</h3>
+<p>사망 프레임을 그대로 덤프했습니다.</p>
+<pre>t=41.83  charge=0.18  group=1  free=0/180  eta=0.21  <span class="k">reachable=false</span>
+walls: side=0 span=8/8 kind=seal      <span class="c">← 틈이 없는 SEAL 링</span></pre>
+<p>
+  봇은 SEAL 앞에서 <b>PULSE를 요청조차 하지 않고</b> 가만히 서서 죽고 있었습니다.
+  봇의 게이트가 <code>charge &gt;= 0.32</code>를 요구했기 때문입니다.
+  그런데 게임의 실제 규칙은 다릅니다.
+</p>
+<pre><span class="c">// World._updatePulse — 박자 위에서는 게이지와 무관하게 통과시킨다.</span>
+<span class="k">if</span> (perfect || <span class="k">this</span>.charge &gt;= cost - 1e-6) { ... }</pre>
+<p>
+  <b>게임은 허락하는데 봇이 스스로 금지하고 있었습니다.</b>
+  게이지 0.18로도 비트만 맞으면 뚫을 수 있는 벽 앞에서, 봇은 자기가 만든 더 엄격한 규칙 때문에
+  포기한 것입니다.
+</p>
+
+<div class="callout warn">
+  <span class="lbl">이 실패가 위험했던 이유</span>
+  <p>
+    봇의 보고는 <b>"차트가 불공정하다"</b>였습니다. 그 말을 믿고 차트 생성기를 고쳤다면
+    <b>멀쩡한 차트를 망가뜨리면서 진짜 버그는 그대로 남았을 것</b>입니다.
+    자동화된 검사가 틀렸을 때 가장 비싼 대가는 검사가 실패하는 것이 아니라
+    <b>엉뚱한 파일을 고치게 만드는 것</b>입니다.
+  </p>
+</div>
+
+<h3>조치</h3>
+<p>봇의 게이트를 게임의 게이트와 일치시키고, 다시는 갈라지지 않도록 근거를 주석으로 못박았습니다.</p>
+<pre><span class="c">// 여기의 게이트는 월드의 게이트여야 하며, 그것을 더 엄격하게 추측한 값이면 안 된다.</span>
+<span class="c">// 월드는 박자 위의 PULSE를 절대 거부하지 않는다 (ONBEAT_ALWAYS_ALLOWED).</span>
+<span class="c">// 그 규칙이 SEAL을 공정하게 만드는 근거 전부다.</span>
+<span class="k">const</span> onBeat = world.beatError() &lt;= BEAT_WINDOW;
+<span class="k">if</span> (group &gt; 0 &amp;&amp; (bestIdx &lt; 0 || !reachable) &amp;&amp; world.pulseTimer &lt;= 0) {
+  <span class="k">if</span> ((onBeat || world.charge &gt;= PULSE_COST) &amp;&amp; eta &lt; 0.34) world.requestPulse();
+}</pre>
+<p>
+  결과: 실패하던 차트 2개가 <b>전부 100%</b>가 되었습니다.
+  <b>차트 코드는 한 줄도 고치지 않았습니다.</b>
+</p>
+
+<div class="callout key">
+  <span class="lbl">여기서 얻은 원칙</span>
+  <p>
+    AI가 만든 검증 도구도 <b>검증 대상</b>입니다. 서로 다른 두 도구가 모순된 주장을 하면,
+    <b>둘 중 하나가 틀렸다는 사실 자체가 가장 중요한 신호</b>입니다.
+    그래서 실패 보고를 받았을 때 "무엇을 고칠까"보다
+    <b>"누가 거짓말하고 있나"</b>를 먼저 묻는 절차를 두었습니다.
+  </p>
+</div>
+
+<h2><span class="n">07</span>주요 프롬프트 및 지시 사항</h2>
+
+<p>실제로 입력한 지시를 그대로 옮깁니다. 요약하거나 윤색하지 않았습니다.</p>
+
+<h3>① 방향 전환 — 해결책이 아니라 증상만 전달</h3>
+<blockquote><p>"너~~무 재미없고 렉걸리고, 지루하고, 뻔하고 루즈하고 노잼"</p></blockquote>
+<p>
+  해결책을 지정하지 않고 증상만 줬습니다. "렉"과 "지루함"은 층위가 다른 문제이므로
+  <b>원인을 분리해 진단하도록</b> 시켰고, 두 갈래로 나뉘었습니다 — 성능은
+  <code>shadowBlur</code> 남용, 재미는 <b>"피하는 게임에는 잘할 이유가 없다"</b>는 구조적 문제.
+  후자에서 <b>GRAZE = 스칠수록 강해진다</b>는 지금의 중심 규칙이 나왔습니다.
+</p>
+
+<h3>② 연출 지시 — 수치 상한을 함께 준다</h3>
+<blockquote><p>
+  "게임 화면 각도를 2D가 아니라, <b>최대 45도까지</b> 기울어지도록(시간 지났을때, 어려운 구간에서)
+  구현해줘. 더 모션 웅장 번쩍 재밌게 수정"
+</p></blockquote>
+<p>
+  "멋있게"라는 모호한 요구에 <b>검증 가능한 상한(45°)</b>과 <b>변화 조건(시간·난이도)</b>을
+  함께 넣었습니다. 덕분에 "구현했다"는 주장을 <b>실제 화면에서 각도를 재서</b> 확인할 수 있었습니다.
+</p>
+<table>
+  <thead><tr><th>구간</th><th class="num">속도</th><th class="num">실측 기울기</th></tr></thead>
+  <tbody>
+    <tr><td>RUNWAY (도입)</td><td class="num">0.88</td><td class="num">7.7°</td></tr>
+    <tr><td>VECTOR</td><td class="num">1.30</td><td class="num">16.5°</td></tr>
+    <tr><td>PRESSURE</td><td class="num">1.50</td><td class="num">25.3°</td></tr>
+    <tr><td>DROP</td><td class="num">1.72</td><td class="num">36.3°</td></tr>
+    <tr><td><b>TERMINAL</b></td><td class="num">2.05</td><td class="num"><b>45.0°</b></td></tr>
+  </tbody>
+</table>
+<p>
+  초기 구현은 연출 충격이 겹칠 때 <b>약 53°까지 넘어갔습니다.</b> 지시는 "최대 45도"였으므로
+  <b>하드 상한으로 다시 조였고</b>, 모든 충격을 동시에 발생시켜도 <code>45.00°</code>에서
+  멈추는 것을 확인했습니다.
+</p>
+
+<h3>③ 성능 지시 — 금지 목록을 먼저 준다</h3>
+<blockquote><p>"<code>ctx.shadowBlur</code>는 프로젝트 전체에서 금지. 검사 스크립트가 잡아내게 만들어라."</p></blockquote>
+<p>
+  "최적화해줘"가 아니라 <b>단일 금지 규칙 + 자동 강제</b>입니다.
+  AI에게 판단을 맡기면 매번 다르게 판단하지만, 검사 스크립트는 매번 같게 판단합니다.
+</p>
+
+<h3>④ 공정성 지시 — 통과 기준을 숫자로</h3>
+<blockquote><p>
+  "오토플레이 봇을 만들어서 모든 차트를 100% 클리어하는지 CI에서 확인해라. 하나라도 못 깨면 실패로 처리."
+</p></blockquote>
+<p>
+  재미는 자동 판정이 불가능하지만 <b>공정성은 가능</b>합니다.
+  판정 가능한 것만 자동화하고, 나머지에 사람의 시간을 남겼습니다.
+</p>
+
+<h3>⑤ 진단 지시 — 고치기 전에 증거를 요구</h3>
+<blockquote><p>
+  "봇이 왜 죽는지 <b>먼저 증명해라.</b> 추측으로 차트 건드리지 말고, 죽는 프레임을 그대로 찍어서 보여줘."
+</p></blockquote>
+<p>
+  §6의 사고를 막은 지시입니다. AI는 실패를 보면 즉시 수정하려는 경향이 있어서
+  <b>"수정 금지, 증거 먼저"</b>를 명시적으로 요구해야 했습니다.
+</p>
+
+<h3>⑥ 복구 지시 — 삭제된 빌드를 작업 기록에서 되살리기</h3>
+<blockquote><p>"이때 말했던 버전 게임 다시 플레이할 수 있게 보내줘"</p></blockquote>
+<p>
+  해당 버전은 이후 실험 과정에서 <b>덮어써져 디스크에 존재하지 않았고 git 이력도 없었습니다.</b>
+  AI에게 <b>자기 작업 기록에 남은 파일 쓰기·편집 호출을 순서대로 재생</b>하도록 지시해
+  삭제된 빌드를 복원했습니다. 100개 작업 중 98개가 자동 적용되었고 나머지는 손으로 메웠습니다.
+  이 경험이 지금 저장소에 커밋 이력을 남기는 이유입니다.
+</p>
+
+<h2><span class="n">08</span>외부 에셋 · 오픈소스 출처</h2>
+
+<div class="callout key">
+  <span class="lbl">결론</span>
+  <p>
+    <b>외부 에셋 파일과 서드파티 라이브러리를 하나도 사용하지 않았습니다.</b>
+    <code>package.json</code>에 <code>dependencies</code> 항목이 존재하지 않으며,
+    <code>node_modules</code> 없이 실행됩니다.
+  </p>
+</div>
+
+<table>
+  <thead><tr><th style="width:34mm">항목</th><th>출처 / 라이선스</th></tr></thead>
+  <tbody>
+    <tr><td><b>런타임 라이브러리</b></td><td>없음. 브라우저 표준 API만 사용 — ES Modules, Canvas 2D, Web Audio API, Gamepad API, MediaRecorder API.</td></tr>
+    <tr><td><b>빌드 도구</b></td><td>없음. 번들러·트랜스파일러·전처리기를 쓰지 않습니다.</td></tr>
+    <tr><td><b>이미지 · 스프라이트</b></td><td>없음. 모든 그래픽은 런타임에 Canvas 2D 코드로 그립니다. 앱 아이콘도 저장소의 <code>scripts/make_icons.mjs</code>가 생성합니다.</td></tr>
+    <tr><td><b>사운드 · 음악</b></td><td>없음. 오디오 파일이 0개입니다. 드럼·베이스·아르페지오·패드·리버브·딜레이를 Web Audio 노드로 실시간 합성합니다.</td></tr>
+    <tr><td><b>폰트</b></td><td>웹폰트 미탑재. OS 기본 시스템 폰트와 모노스페이스 폰트만 지정합니다.</td></tr>
+    <tr><td><b>CI 액션</b></td><td>GitHub 공식 액션 — <code>actions/checkout</code>, <code>setup-node</code>, <code>configure-pages</code>, <code>upload-pages-artifact</code>, <code>deploy-pages</code> (MIT). 배포 파이프라인 전용이며 게임 실행물에 포함되지 않습니다.</td></tr>
+    <tr><td><b>게임 코드</b></td><td>전량 본 팀 자체 작성(AI 도구 활용). MIT 라이선스로 저장소에 공개.</td></tr>
+  </tbody>
+</table>
+
+<h3>창작 범위</h3>
+<p>
+  게임 규칙, 차트, 그래픽, 음악, 코드 <b>전부 본 팀이 자체 설계·작성</b>했습니다.
+  타사 게임의 코드·에셋·차트 데이터를 참조하거나 사용한 부분이 없습니다.
+  중심 규칙인 <b>GRAZE 자원 경제</b>(스칠수록 강해지고 안전 플레이는 0점)와
+  <b>박자 위에서만 열리는 SEAL</b>은 본 팀의 고유 설계입니다.
+</p>
+
+<h2><span class="n">09</span>맺음</h2>
+
+<ul>
+  <li><b>AI에게 맡긴 것은 구현이고, 사람이 쥔 것은 판정 기준입니다.</b>
+      "무엇을 합격으로 볼 것인가"를 먼저 정의하고 그 정의를 코드로 강제했습니다.</li>
+  <li><b>자동 판정이 가능한 것만 자동화했습니다.</b> 공정성·성능·API 금지는 기계가 보고
+      재미는 사람이 봅니다. 이 경계를 흐리지 않은 것이 속도의 이유입니다.</li>
+  <li><b>AI의 자기 보고를 신뢰하지 않았습니다.</b> "구현했다"는 문장 대신
+      실행 중인 화면에서 잰 숫자를 받았고, 그 습관이 §6의 오진을 막았습니다.</li>
+  <li><b>AI가 만든 도구도 의심 대상에 넣었습니다.</b> 검사기가 실패를 보고했을 때
+      제품이 아니라 검사기가 틀렸던 사례가 실제로 있었고, 그것을 잡아낸 것이
+      이 프로젝트에서 가장 값이 나갔던 판단입니다.</li>
+</ul>
+
+<table style="margin-top:5mm">
+  <tbody>
+    <tr><th style="width:24mm">플레이</th><td><a href="https://aiswkimbeomsu.github.io/pulsefall/">https://aiswkimbeomsu.github.io/pulsefall/</a></td></tr>
+    <tr><th>소스 코드</th><td><a href="https://github.com/AISWKimBeomSu/pulsefall">https://github.com/AISWKimBeomSu/pulsefall</a></td></tr>
+  </tbody>
+</table>
+
+<footer>
+  <span>PULSEFALL — AI 활용 기술 문서</span>
+  <span>NAN 2026 사전 과제 · 김범수 · 송채우 · 신승민</span>
+</footer>
+
+</body>
+</html>
