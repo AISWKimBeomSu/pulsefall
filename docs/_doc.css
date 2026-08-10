@@ -1,0 +1,133 @@
+@page { size: A4; margin: 16mm 15mm 14mm; }
+
+* { box-sizing: border-box; }
+
+html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+body {
+  margin: 0;
+  font-family: "Pretendard", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo",
+    "Noto Sans KR", "Malgun Gothic", sans-serif;
+  font-size: 10.2pt;
+  line-height: 1.62;
+  color: #15161c;
+  background: #fff;
+}
+
+code, .mono {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 0.88em;
+}
+
+/* ---- cover ------------------------------------------------------------- */
+
+.cover { padding: 4mm 0 7mm; border-bottom: 2.5px solid #15161c; margin-bottom: 7mm; }
+.eyebrow {
+  font-size: 8.4pt; letter-spacing: .22em; text-transform: uppercase;
+  color: #7a7d8c; font-weight: 700; margin: 0 0 3mm;
+}
+.cover h1 {
+  margin: 0; font-size: 25pt; letter-spacing: -.02em; font-weight: 800; line-height: 1.12;
+}
+.cover .sub { margin: 2.5mm 0 0; font-size: 12pt; color: #3d4050; font-weight: 500; }
+.cover .meta {
+  margin: 5mm 0 0; display: flex; flex-wrap: wrap; gap: 3mm 7mm;
+  font-size: 8.8pt; color: #6a6d7c;
+}
+.cover .meta b { color: #15161c; font-weight: 700; }
+
+/* ---- structure --------------------------------------------------------- */
+
+h2 {
+  margin: 8mm 0 3mm; font-size: 13.2pt; font-weight: 800; letter-spacing: -.01em;
+  padding-bottom: 1.6mm; border-bottom: 1.4px solid #d8dae3;
+  break-after: avoid; page-break-after: avoid;
+}
+h2 .n { color: #8f57ff; margin-right: 2.4mm; font-variant-numeric: tabular-nums; }
+h3 {
+  margin: 5.5mm 0 2mm; font-size: 10.8pt; font-weight: 800; color: #23253a;
+  break-after: avoid; page-break-after: avoid;
+}
+p { margin: 0 0 2.6mm; }
+ul, ol { margin: 0 0 3mm; padding-left: 5.2mm; }
+li { margin: 0 0 1.4mm; }
+strong, b { font-weight: 700; }
+a { color: #6a2fd6; text-decoration: none; word-break: break-all; }
+
+.lead { font-size: 11pt; color: #2a2c3c; }
+
+/* ---- blocks ------------------------------------------------------------ */
+
+.callout {
+  margin: 3.5mm 0; padding: 3.4mm 4mm; border-left: 3px solid #8f57ff;
+  background: #f6f2ff; border-radius: 0 3px 3px 0;
+  break-inside: avoid; page-break-inside: avoid;
+}
+.callout.warn { border-left-color: #d9822b; background: #fff7ec; }
+.callout.key  { border-left-color: #109c74; background: #eefaf5; }
+.callout p:last-child { margin-bottom: 0; }
+.callout .lbl {
+  display: block; font-size: 8pt; letter-spacing: .16em; text-transform: uppercase;
+  font-weight: 800; color: #8f57ff; margin-bottom: 1.5mm;
+}
+.callout.warn .lbl { color: #b46a1c; }
+.callout.key .lbl  { color: #0c7d5c; }
+
+pre {
+  margin: 2.6mm 0; padding: 3.2mm 3.6mm; background: #14151d; color: #dfe2ec;
+  border-radius: 4px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 8pt; line-height: 1.5; overflow-x: auto; white-space: pre-wrap;
+  break-inside: avoid; page-break-inside: avoid;
+}
+pre .c { color: #7f8497; }
+pre .k { color: #ff9ec7; }
+pre .s { color: #9fe0a6; }
+
+blockquote {
+  margin: 3mm 0; padding: 2.6mm 0 2.6mm 4.2mm; border-left: 2.5px solid #c9ccd8;
+  color: #43465a; font-style: normal;
+}
+blockquote p { margin: 0 0 1.6mm; }
+blockquote p:last-child { margin: 0; }
+blockquote cite { display: block; font-size: 8.4pt; color: #83869a; }
+
+table {
+  width: 100%; border-collapse: collapse; margin: 3mm 0; font-size: 9.1pt;
+  break-inside: avoid; page-break-inside: avoid;
+}
+th, td { padding: 2.1mm 2.6mm; border-bottom: 1px solid #e3e5ed; text-align: left; vertical-align: top; }
+th {
+  font-size: 8.2pt; letter-spacing: .1em; text-transform: uppercase; color: #6a6d7c;
+  border-bottom: 1.4px solid #b9bcca; font-weight: 800;
+}
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+tbody tr:last-child td { border-bottom: none; }
+
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; }
+
+.card {
+  border: 1.2px solid #dfe1ea; border-radius: 5px; padding: 3.4mm 4mm;
+  break-inside: avoid; page-break-inside: avoid;
+}
+.card h3 { margin-top: 0; }
+
+.stat-row { display: flex; gap: 3mm; margin: 4mm 0; }
+.stat {
+  flex: 1; border: 1.2px solid #dfe1ea; border-radius: 5px; padding: 3mm;
+  text-align: center;
+}
+.stat b { display: block; font-size: 16pt; font-weight: 800; letter-spacing: -.02em; }
+.stat span { display: block; font-size: 7.6pt; letter-spacing: .1em; text-transform: uppercase; color: #7a7d8c; margin-top: .8mm; }
+
+.fill {
+  display: inline-block; min-width: 62mm; padding: 1mm 2mm;
+  border-bottom: 1.6px dashed #c14b4b; color: #c14b4b; font-weight: 700;
+}
+
+.pagebreak { break-before: page; page-break-before: always; }
+.avoid { break-inside: avoid; page-break-inside: avoid; }
+
+footer {
+  margin-top: 9mm; padding-top: 3mm; border-top: 1px solid #dfe1ea;
+  font-size: 8pt; color: #8a8d9c; display: flex; justify-content: space-between;
+}

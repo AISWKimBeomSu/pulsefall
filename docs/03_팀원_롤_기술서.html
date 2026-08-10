@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<title>PULSEFALL — 팀원 롤 기술서</title>
+<link rel="stylesheet" href="_doc.css" />
+</head>
+<body>
+
+<div class="cover">
+  <p class="eyebrow">NAN 2026 · NHN Game × AI 해커톤 · 사전 과제 제출물 ⑤</p>
+  <h1>팀원 롤 기술서</h1>
+  <p class="sub">3인 · 디렉토리 경계로 나눈 소유권</p>
+  <div class="meta">
+    <span><b>프로젝트</b> PULSEFALL</span>
+    <span><b>팀 구성</b> 3인</span>
+    <span><b>제출일</b> 2026. 08. 10</span>
+  </div>
+</div>
+
+<h2><span class="n">01</span>역할 요약</h2>
+
+<table>
+  <thead>
+    <tr><th style="width:22mm">이름</th><th style="width:44mm">담당 역할</th><th>소유 영역 (디렉토리)</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><b>김범수</b></td>
+      <td>팀 리드 · 게임플레이 엔지니어링 · <b>AI 디렉팅</b></td>
+      <td><code>src/core/</code> · <code>src/game/</code> · <code>.github/</code> · 저장소·배포</td>
+    </tr>
+    <tr>
+      <td><b>송채우</b></td>
+      <td>게임 디자인 · 렌더링 · UX</td>
+      <td><code>src/render/</code> · <code>src/ui/</code> · <code>index.html</code> · <code>styles.css</code></td>
+    </tr>
+    <tr>
+      <td><b>신승민</b></td>
+      <td>오디오 · 툴링 · QA</td>
+      <td><code>src/audio/</code> · <code>scripts/</code> · <code>src/core/recorder.js</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="callout">
+  <span class="lbl">분업 기준</span>
+  <p>
+    기능 단위가 아니라 <b>디렉토리 단위로 소유권</b>을 나눴습니다. 3인이 AI 도구로 동시에
+    코드를 생성하면 같은 파일을 서로 덮어쓰는 사고가 가장 먼저 발생하기 때문에,
+    <b>"한 파일에는 주인이 한 명"</b>을 먼저 정하고 시작했습니다.
+    경계를 넘는 변경은 인터페이스만 합의하고 각자 자기 쪽에서 구현했습니다.
+  </p>
+</div>
+
+<h2><span class="n">02</span>김범수 — 팀 리드 · 게임플레이 엔지니어링 · AI 디렉팅</h2>
+
+<h3>실제로 맡아 구현한 영역</h3>
+<ul>
+  <li><b>시뮬레이션 코어</b> (<code>src/core/loop.js</code>) — 240Hz 고정 틱 누산기 루프.
+      시뮬레이션을 렌더 프레임에서 완전히 분리해, 프레임률과 무관하게 재생 결과가 동일하도록 보장.
+      이 결정론이 이후 모든 자동 검증의 전제가 됨.</li>
+  <li><b>월드 시뮬레이션</b> (<code>src/game/world.js</code>) — 충돌, GRAZE 판정, HEAT/체인,
+      PULSE 게이지와 쿨다운. <b>"박자 위의 PULSE는 절대 거부하지 않는다"</b>는 게임 전체의
+      중심 규칙을 정의하고 문서화한 지점.</li>
+  <li><b>차트 컴파일러 · 공정성 솔버</b> (<code>src/game/chart.js</code>) —
+      벽을 도착 시각 기준 링으로 묶고, 플레이어의 실제 각속도로 도달 가능성을 계산해
+      <b>불가능한 배치를 컴파일 타임에 제거</b>. SEAL 링은 PULSE 쿨다운까지 모델링해 검증.</li>
+  <li><b>패턴 · 트랙 데이터</b> (<code>src/game/patterns.js</code>, <code>tracks.js</code>) —
+      3개 고정 곡 24개 구간의 난이도 곡선 설계.</li>
+  <li><b>CI · 배포</b> (<code>.github/workflows/pages.yml</code>) —
+      스모크 테스트를 통과한 커밋만 GitHub Pages로 배포되는 파이프라인.</li>
+</ul>
+
+<h3>AI 디렉팅 담당분</h3>
+<p>
+  AI에게 줄 <b>상시 제약("헌법")</b>을 정의하고, 그것을 프롬프트가 아니라
+  <b>자동 검사로 강제하는 형태</b>로 옮기는 일을 맡았습니다.
+  또한 AI가 낸 실패 보고를 <b>그대로 믿지 않고 재검증하는 절차</b>를 팀 규칙으로 세웠고,
+  실제로 오토플레이 봇이 멀쩡한 차트를 "불공정하다"고 오진한 사건을 이 절차로 잡아냈습니다.
+  (상세: AI 활용 기술 문서 §5)
+</p>
+
+<h2><span class="n">03</span>송채우 — 게임 디자인 · 렌더링 · UX</h2>
+
+<h3>실제로 맡아 구현한 영역</h3>
+<ul>
+  <li><b>축측 투영 렌더러</b> (<code>src/render/renderer.js</code>) —
+      원근이 아닌 <b>축측(axonometric)</b> 투영을 택해, 화면이 아무리 기울어도
+      <b>먼 레인과 가까운 레인의 틈 폭이 동일</b>하도록 보장.
+      연출이 판정 난이도를 바꾸지 않게 만든 핵심 결정.</li>
+  <li><b>동적 카메라 (0°→45°)</b> — 구간 속도·각형 수·회전량(54%), 진행도(30%), HEAT(16%)를
+      합산해 기울기를 결정. 들어갈 때는 빠르고 빠질 때는 3배 느리게 감쇠시켜,
+      난이도가 닥칠 때는 바닥이 꺼지는 느낌을, 지나간 뒤에는 안도감을 만듦.
+      <b>45°는 넘을 수 없는 하드 상한</b>으로 고정.</li>
+  <li><b>모션 연출</b> — 구간 전환 시 진자형 롤 스윙(진폭 11°, 연속 구간마다 방향 반전),
+      비트 웨블, PULSE 임팩트 킥, 줌 돌리, 기울기 반응형 지평선 발광.</li>
+  <li><b>팔레트 시스템</b> (<code>src/render/palette.js</code>) — HEAT에 따라 색이
+      실시간으로 재구성되는 구조. 곡마다 다른 테마.</li>
+  <li><b>UI · 온보딩</b> (<code>src/ui/ui.js</code>, <code>index.html</code>, <code>styles.css</code>) —
+      전 화면 전환, HUD, 결과 화면, PRACTICE. <b>첫 방문자는 규칙 화면을 먼저 거치고</b>
+      그 화면이 「바로 시작」 버튼으로 끝나도록 설계.
+      시작 버튼은 뷰포트 높이와 무관하게 항상 화면 안에 붙어 있도록 고정.</li>
+</ul>
+
+<h3>디자인 결정 담당분</h3>
+<p>
+  <b>"피하는 게임"을 "붙어 있는 게임"으로 뒤집는</b> 방향을 제안했습니다.
+  안전하게 지나가면 아무 보상이 없고 스칠수록 강해지게 만들어,
+  <b>살아남는 것과 잘하는 것이 정반대 방향</b>이 되도록 규칙을 설계했습니다.
+  점수식을 <code>시간 × HEAT</code>로 둔 것도 같은 이유입니다.
+</p>
+
+<h2><span class="n">04</span>신승민 — 오디오 · 툴링 · QA</h2>
+
+<h3>실제로 맡아 구현한 영역</h3>
+<ul>
+  <li><b>Web Audio 엔진</b> (<code>src/audio/engine.js</code>) —
+      마스터 버스, 글루 컴프레서, 하이셸프, 컨볼루션 리버브, 피드백 딜레이.
+      <b>오디오 파일 0개</b>로 모든 소리를 신스 보이스로 합성.</li>
+  <li><b>음악 시퀀서</b> (<code>src/audio/music.js</code>) — 구간별 드럼·베이스·아르페지오·패드를
+      곡 진행에 맞춰 실시간 편성. 벽이 <b>비트에 도착</b>하므로 음악이 곧 판정 정보.</li>
+  <li><b>효과음</b> (<code>src/audio/sfx.js</code>) — GRAZE 체인, PULSE 성패, HEAT 티어,
+      구간 전환, 사망.</li>
+  <li><b>오토플레이 봇 · 스모크 테스트</b> (<code>scripts/smoke_test.mjs</code>, <code>bot.mjs</code>) —
+      헤드리스로 전 차트를 실제 플레이해 클리어 가능성을 증명하는 <b>79개 자동 검사</b>.
+      금지 API(<code>ctx.shadowBlur</code>) 정적 검사 포함.</li>
+  <li><b>렌더 감사 도구</b> (<code>scripts/audit.mjs</code>) — 프레임당 드로우 비용 계측.</li>
+  <li><b>인게임 플레이 캡처</b> (<code>src/core/recorder.js</code>) —
+      캔버스 백버퍼와 오디오 그래프를 직접 탭해 <b>편집·합성 없이</b> 실제 플레이 화면 그대로 녹화.
+      화면 녹화와 달리 프레임을 잃지 않고 커서·주소창이 찍히지 않음.</li>
+</ul>
+
+<h3>QA 담당분</h3>
+<p>
+  "봇이 못 깨는 차트는 차트가 아니다"를 <b>배포 차단 조건</b>으로 만들었습니다.
+  push마다 3개 고정 곡 + DAILY + ENDLESS 6시드를 전부 플레이해
+  <b>하나라도 100%에 도달하지 못하면 배포가 멈춥니다.</b>
+</p>
+
+<div class="pagebreak"></div>
+
+<h2><span class="n">05</span>협업 · 분업 방식</h2>
+
+<h3>5.1 소유권 규칙</h3>
+<table>
+  <thead><tr><th style="width:40mm">규칙</th><th>이유</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><b>한 파일에는 주인이 한 명</b></td>
+      <td>3인이 AI 코딩 도구를 동시에 쓰면 충돌은 병합 충돌이 아니라
+          <b>조용한 덮어쓰기</b>로 나타납니다. 디렉토리로 경계를 그어 원천 차단.</td>
+    </tr>
+    <tr>
+      <td><b>경계를 넘을 땐 인터페이스만 합의</b></td>
+      <td>예: 렌더러가 월드를 <b>읽기만</b> 하도록 고정. 연출 담당이 시뮬레이션을
+          건드릴 수 없으므로 판정이 오염될 경로 자체가 없습니다.</td>
+    </tr>
+    <tr>
+      <td><b>공유 규칙은 상수와 주석으로 못박기</b></td>
+      <td>세 사람이 각자 AI에게 코드를 시키면 같은 규칙을 <b>서로 다르게 재구현</b>합니다.
+          실제로 그 사고가 났고(§AI 문서 5), 이후 근거를 코드 주석에 명시하는 것을 규칙화.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>5.2 통합 방식</h3>
+<ul>
+  <li><b>통합 기준은 사람의 리뷰가 아니라 스모크 테스트</b>입니다.
+      79개 검사를 통과하지 못한 변경은 main에 들어가지 않습니다.</li>
+  <li>배포는 <b>GitHub Actions가 자동 수행</b>합니다.
+      테스트 → 통과 시에만 Pages 배포. 수동 배포 경로가 없습니다.</li>
+  <li>커밋은 <b>레이어 단위</b>로 남겼습니다(core → audio → game → render → ui → tooling).
+      어느 층에서 무엇이 들어왔는지 이력만으로 읽히도록.</li>
+</ul>
+
+<h3>5.3 AI 도구 사용에 대한 팀 규칙</h3>
+<div class="callout key">
+  <span class="lbl">세 사람이 공유한 원칙</span>
+  <ol style="margin-bottom:0">
+    <li><b>AI에게 "무엇을 만들지"가 아니라 "무엇을 합격으로 볼지"를 먼저 준다.</b>
+        판정 기준 없이 생성부터 시키면, 나온 결과가 좋은지 나쁜지 팀이 합의할 방법이 없습니다.</li>
+    <li><b>자동 판정이 가능한 것만 자동화한다.</b>
+        공정성·성능·금지 API는 기계가 봅니다. 재미는 사람이 봅니다. 이 경계를 흐리지 않습니다.</li>
+    <li><b>AI의 자기 보고를 근거로 삼지 않는다.</b>
+        "구현했습니다"가 아니라 실행 중인 화면에서 잰 숫자를 받습니다.</li>
+    <li><b>AI가 만든 검증 도구도 의심 대상이다.</b>
+        두 도구가 모순되면 제품보다 도구를 먼저 의심합니다.</li>
+  </ol>
+</div>
+
+<h2><span class="n">06</span>기여 범위 한눈에</h2>
+
+<table>
+  <thead>
+    <tr><th>영역</th><th style="width:26mm">주 담당</th><th style="width:26mm">보조</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>시뮬레이션 루프 · 결정론</td><td><b>김범수</b></td><td>신승민 (검증)</td></tr>
+    <tr><td>충돌 · GRAZE · HEAT · PULSE 규칙</td><td><b>김범수</b></td><td>송채우 (밸런스)</td></tr>
+    <tr><td>차트 컴파일러 · 공정성 솔버</td><td><b>김범수</b></td><td>신승민 (봇 대조)</td></tr>
+    <tr><td>렌더링 · 동적 카메라 · 팔레트</td><td><b>송채우</b></td><td>—</td></tr>
+    <tr><td>게임 규칙 디자인 · 난이도 곡선</td><td><b>송채우</b></td><td>김범수 (구현)</td></tr>
+    <tr><td>UI · 온보딩 · 결과 · PRACTICE</td><td><b>송채우</b></td><td>—</td></tr>
+    <tr><td>오디오 합성 · 시퀀서 · 효과음</td><td><b>신승민</b></td><td>—</td></tr>
+    <tr><td>오토플레이 봇 · 스모크 테스트</td><td><b>신승민</b></td><td>김범수 (규칙 정합)</td></tr>
+    <tr><td>플레이 캡처 · 감사 도구</td><td><b>신승민</b></td><td>—</td></tr>
+    <tr><td>CI · 배포 · 저장소 운영</td><td><b>김범수</b></td><td>신승민</td></tr>
+    <tr><td>제출 문서</td><td><b>김범수</b></td><td>송채우 · 신승민</td></tr>
+  </tbody>
+</table>
+
+<footer>
+  <span>PULSEFALL — 팀원 롤 기술서</span>
+  <span>NAN 2026 사전 과제 · 김범수 · 송채우 · 신승민</span>
+</footer>
+
+</body>
+</html>
